@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.Aniverse.Common.mapper.UserInfo.User_Mapper">
+
+    <insert id="Sign_insert" parameterType="java.util.HashMap">
+        WITH userinfo_insert AS (
+         insert into userinfo(id, username, nickname, phone, email, password, address , connectid, log_kind, 
+         createdate, nickname_initials, linkid, social_type)
+         values(#{id} , #{name} ,  #{nickname} ,#{phone} ,#{email} , #{password}, #{address} , 
+         #{uuid} ,#{log_kind} ,#{createdate},extract_initials(#{nickname}), 'C','N' )
+            RETURNING connectid, nickname
+        )
+        INSERT INTO usernickpart (connectid, consonant, vowels, initial)
+        SELECT 
+            connectid, 
+            extract_initials(nickname), 
+            extract_vowels(nickname),
+            create_initial(nickname)
+        FROM userinfo_insert;
+    </insert>
+
+ <insert id="kakao_insert"  parameterType="java.util.HashMap">
+  WITH userinfo_insert AS (
+  insert into userinfo(id, username, nickname, email, connectid ,log_kind ,gender, profile_img, 
+  thumnail_img , createdate, linkid, social_type, gender)
+  values(#{id} , #{nickname} , #{nickname} , #{email} , #{uuid} , 'social' , #{gender} , #{profile} , 
+  #{thumbnail} ,#{createdate}, 'C', #{social_type}, #{gender})
+     RETURNING connectid, nickname
+     )
+      INSERT INTO usernickpart (connectid, consonant, vowels, initial)
+        SELECT 
+            connectid, 
+            extract_initials(nickname), 
+            extract_vowels(nickname),
+            create_initial(nickname)
+        FROM userinfo_insert;
+ </insert>
+ 
+  <insert id="naver_insert"  parameterType="java.util.HashMap">
+  WITH userinfo_insert AS (
+  insert into userinfo(id, username, nickname, email, connectid ,log_kind ,gender, profile_img, 
+  createdate, linkid, phone, social_type)
+  values(#{id} , #{username} , #{nickname} , #{email} , #{uuid} , 'social' , #{gender} , #{profile} , 
+  #{createdate}, 'C', #{mobile}, #{social_type})
+     RETURNING connectid, nickname
+     )
+      INSERT INTO usernickpart (connectid, consonant, vowels, initial)
+        SELECT 
+            connectid, 
+            extract_initials(nickname), 
+            extract_vowels(nickname),
+            create_initial(nickname)
+        FROM userinfo_insert;
+ </insert>
+
+
+	<update id="reset_password" parameterType="java.util.HashMap">
+	   update userinfo
+	   set password =#{New_password}
+	   where id=#{id}
+	</update>
+   <update id="dtlink" parameterType="String">
+   </update>
+	
+	  <select id="Naver_user_info" parameterType="String" resultType="java.util.HashMap">
+		  select connectid, id,email, nickname,COALESCE(profile_img, 'N') AS profile_img, username  
+		  from userinfo where id=#{id} and log_kind='social';
+ 	  </select>
+ 
+  	   <select id="Kakao_user_info" parameterType="String" resultType="java.util.HashMap">
+			SELECT
+			  u.connectid,
+			  COALESCE(u.profile_img, 'N') AS profile_img,
+			  u.username,
+			  u.nickname,
+			  u.email
+			FROM user_social s
+			JOIN userinfo u
+			  ON u.connectid = s.connectid
+			WHERE s.social_type = 'kakao'
+			  AND s.social_id   = #{id};
+   	   </select>
+	   
+	<select id="beforepassword" parameterType="String" resultType="String">
+	   select password from userinfo where id=#{Id};
+	</select>
+	
+	<select id="Matfalow_List" resultType="java.util.HashMap" parameterType="String">
+	   SELECT u2.nickname, COALESCE(u2.profile_img, 'N') AS img, r.relationid AS id, u2.connectid
+	   FROM userinfo u1
+	   JOIN relationuser r ON u1.connectid = r.connetid
+	   JOIN userinfo u2 ON u2.id = r.relationid 
+	   WHERE r.connetid = (SELECT connectid FROM userinfo WHERE id = #{Id});
+	</select>
+	
+	<select id="friendfind" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select u.nickname, (select exists (select 1 from relationuser r where 
+		r.connetid =(select connectid from userinfo u where u.id=#{Myid}) 
+		and r.relationid=#{Userid})) as id_exist ,
+		(select count(r.connetid) from relationuser r where r.connetid =((select connectid  from userinfo  where id=#{Userid}))) as follower,
+		(select count(r.relationid) from relationuser r where r.relationid =#{Userid}) as following,
+		(select profile_img from userinfo   where id=#{Userid}) as profile
+		from userinfo u 
+		where u.id=#{Userid}
+		limit 1;
+	</select>
+
+	<select id="findId" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select id from userinfo where username=#{username} and email=#{email};
+    </select>
+       
+   <select id="Search_email" parameterType="String" resultType="boolean">
+	  	select EXISTS (select 1 from
+		userinfo where
+	    email=#{email} and log_kind='normal' and linkid != 'X' limit 1);
+   </select>
+	<select id="getUserLoginInfo" parameterType="String" resultType="java.util.HashMap">
+	   SELECT * FROM get_user_login_info(#{Id});
+	</select>
+	
+	   <select id="user_id" resultType="String" parameterType="String">
+		  select id from userinfo where phone=#{Phone_number};
+	   </select>
+
+   
+   <select id="Search_Phone" parameterType="String" resultType="boolean">
+   		select EXISTS (select 1 from
+		userinfo where
+        phone=#{Phone_number} limit 1);
+   </select>
+   
+   <select id="Search_Nickname" parameterType="String" resultType="boolean">
+   		select EXISTS (select 1 from
+		userinfo where
+        nickname=#{nickname} limit 1);
+   </select>
+   
+   <select id="Search_Id" parameterType="String" resultType="boolean">
+   		select EXISTS (select 1 from
+		userinfo where
+        id=#{id} limit 1);
+   </select>
+   
+    <select id="Connect_Email" parameterType="String" resultType="boolean">
+   		select EXISTS (select 1 from
+		userinfo where
+        email=#{Email} limit 1);
+   </select>
+   <select id="Connecting_Id" parameterType="String" resultType="java.util.HashMap">
+    select id , createdate from userinfo where email=#{Email} and social_type='N'
+    limit 1;
+   </select>
+   
+    <select id="user_info" parameterType="String" resultType="java.util.HashMap">
+	  select connectid,id,email, nickname,COALESCE(profile_img, 'N') AS profile_img, username  
+	  from userinfo where id=#{id};
+    </select>
+   
+    <select id="exist_info" parameterType="java.util.HashMap" resultType="boolean">
+	    select EXISTS (select 1 from
+	   userinfo where
+	   id=#{id}  and email=#{email} limit 1);
+ 	</select>
+ 	
+ 	  <select id="Naver_Check_id" parameterType="String" resultType="boolean">
+		   select EXISTS (select 1 from
+		   user_social where
+		   social_id=#{id}  and social_type='naver' limit 1);
+	   </select>
+	   <select id="Kakao_Check_id" parameterType="String" resultType="boolean">
+		   select EXISTS (select 1 from
+		   user_social where
+		   social_id=#{id}  and social_type='kakao' limit 1);
+	   </select>
+	
+	<delete id="Folloer_cancel" parameterType="java.util.HashMap">
+		delete from relationuser where connetid=(select connectid from userinfo where id=#{Id}) 
+		and relationid=#{Userid};
+	</delete>
+	
+	<insert id="Follower_connect" parameterType="java.util.HashMap">
+		insert into relationuser(connetid ,relationid ,relationdate) 
+		select connectid  , #{Userid} , #{relationdate} from userinfo  where id=#{Id};
+	</insert>
+   
+   
+</mapper>

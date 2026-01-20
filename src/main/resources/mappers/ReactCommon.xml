@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.Aniverse.Common.mapper.ReactCommon.ReactCommon_Mapper">
+
+   <select id="isHeart_Check" parameterType="java.util.HashMap" resultType="boolean">
+   select EXISTS (select 1 from
+   likes where
+   content_id=#{content_id}  and user_id=#{user_id});
+   </select>
+   
+   <select id="comment_cnt" parameterType="String" resultType="int">
+   select comment_cnt  from contentinfo where contentid=#{contentid};
+   </select>
+   <select id="Comment_exist" parameterType="String" resultType="boolean">
+      select EXISTS (select 1 from
+   contentinfo where
+   contentid=#{contentid});
+   </select>
+
+</mapper>
