@@ -33,12 +33,13 @@ public class LoginService {
 	public Map<String, Object> Login(LoginRequest infos ,HttpServletRequest request){
 		Map<String, Object> result = new HashMap<>();
 		Map<String, Object> UserInfo = new HashMap<>();
-		logger.info("로그인 정보 :" + infos);
+		logger.info("로그인 정보 :" + infos.getId());
 		String accessToken = request.getHeader("Authorization");
 		if(accessToken == null || accessToken.isEmpty()) {
 			logger.info("최초 로그인 ");
 			UserInfo =userinfo.getUserLoginInfo(infos.getId());
-			if(UserInfo == null || UserInfo.get("id") == null) {
+			logger.info("정보 :" +UserInfo );
+			if(UserInfo == null) {
 				logger.error("아이디가 존재하지 않음");
 				
 				throw new CustomException(ErrorCode.INVALID_ID_OR_PASSWORD,null) ;
@@ -52,7 +53,7 @@ public class LoginService {
 					logger.info("토큰 생성 정보 :" + TokenInfos);
 					
 					Map<String, Object> data = new HashMap<>();
-					data.put("id", UserInfo.get("id").toString());
+					data.put("id", infos.getId());
 					data.put("NickName", UserInfo.get("nickname").toString());
 					data.put("access_token", TokenInfos.get("access_token").toString());
 					data.put("refresh_token", TokenInfos.get("refresh_token").toString());

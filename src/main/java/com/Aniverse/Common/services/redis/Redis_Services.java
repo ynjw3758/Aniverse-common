@@ -106,17 +106,14 @@ public class Redis_Services {
 
         final ValueOperations<String, Object> valueOperations = refreshTokenRedisTemplate.opsForValue();
         if(key.equals("refresh_token")) {
-        	logger.info("refresh_token redis 저장");
         	valueOperations.set(key, value , Duration.ofMinutes(10));
             final String KEY_VALUE = (String) valueOperations.get(key);
-            logger.info("get : " + KEY_VALUE);
         	return;
         	
         }
         valueOperations.set(key, value , Duration.ofMinutes(10));
         
         final String KEY_VALUE = (String) valueOperations.get(key);
-        logger.info("get : " + KEY_VALUE);
         return;
     }
     
@@ -126,7 +123,6 @@ public class Redis_Services {
         valueOperations.set(key, value , Duration.ofMillis(expiredTime));
         
         final String KEY_VALUE = (String) valueOperations.get(key);
-        logger.info("get : " + KEY_VALUE);
         return;
     }
 
