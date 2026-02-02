@@ -1,9 +1,15 @@
-HELP.md
+################################
+# Build / Gradle
+################################
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+
+################################
+# IDE files
+################################
 
 ### STS ###
 .apt_generated
@@ -36,5 +42,28 @@ out/
 ### VS Code ###
 .vscode/
 
-### Spring secrets ###
-src/main/resources/application-l
+################################
+# Spring / Docker secrets
+################################
+
+# Local Spring config (NEVER commit)
+src/main/resources/application-local.properties
+
+# Environment files
+.env
+.env.*
+
+# Docker local override
+docker-compose.override.yml
+
+################################
+# Logs / Security files
+################################
+*.log
+logs/
+
+# Certificates / keys
+*.pem
+*.key
+*.p12
+*.jks
