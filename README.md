@@ -34,12 +34,12 @@ Aniverse 플랫폼에서 사용되는 **공통 도메인 백엔드 서비스**�
 
 ```text
 com/Aniverse/Common
-├─ controller
-├─ services
-├─ mapper
-├─ dto
-├─ entity
-└─ exception
+  ├─ controller # API entry point
+  ├─ services # services logic
+  ├─ mapper # MyBatis mapper
+  ├─ dto # Request / Response DTO
+  ├─ entity # Domain entity
+  └─ exception # Custom exceptions
 
 
 
