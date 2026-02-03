@@ -15,7 +15,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
-@MapperScan(basePackages = "com.Aniverse.Common.mapper.UserInfo", sqlSessionFactoryRef = "userSqlSessionFactory")
+@MapperScan(basePackages = "com.Aniverse.Common.mapper.UserInfo,"
+		+ "com.Aniverse.Common.mapper.Pets", sqlSessionFactoryRef = "userSqlSessionFactory")
 public class User_Info_Mybatis {
 	@Primary
 	@Bean

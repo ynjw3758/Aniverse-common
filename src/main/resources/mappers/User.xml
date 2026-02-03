@@ -115,9 +115,8 @@
 	    email=#{email} and log_kind='normal' and linkid != 'X' limit 1);
    </select>
 	<select id="getUserLoginInfo" parameterType="String" resultType="java.util.HashMap">
-	   select ui.nickname , uc.password_hash as password from userinfo ui join user_credentials uc 
-			on ui.connectid =uc.user_id 
-			where uc.login_id=#{Id};
+		  SELECT connectid, password, nickname
+		  FROM public.get_login_info_by_credentials(#{Id});
 	</select>
 	
 	   <select id="user_id" resultType="String" parameterType="String">
