@@ -25,7 +25,11 @@ public enum ErrorCode {
 	KAKAO_NEED_LINK(409, "E0040", "동일한 메일이 존재합니다."),
 	
 	//네이버 로그인
-	NAVER_NEED_LINK(409, "E0041", "동일한 메일이 존재합니다.");
+	NAVER_NEED_LINK(409, "E0041", "동일한 메일이 존재합니다."),
+	
+    // 공통/요청값 관련(추가 추천)
+    MISSING_USER_HEADER(400, "E0100", "X-User-Id 헤더가 없습니다."),
+    INVALID_UUID(400, "E0101", "UUID 형식이 올바르지 않습니다.");
 	
 	private final int status;
     private final String code;
