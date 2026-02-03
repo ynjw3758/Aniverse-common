@@ -32,6 +32,7 @@ Aniverse 플랫폼에서 사용되는 **공통 도메인 백엔드 서비스**�
 
 ## 📁 Package Structure
 
+```text
 com/Aniverse/Common
 ├─ controller
 ├─ services
@@ -39,6 +40,7 @@ com/Aniverse/Common
 ├─ dto
 ├─ entity
 └─ exception
+
 
 
 
