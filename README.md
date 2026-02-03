@@ -29,14 +29,18 @@ Aniverse 플랫폼에서 사용되는 **공통 도메인 백엔드 서비스**�
 - Gradle / Docker
 
 ---
-## 패키지 구조
-  com/Aniverse/Common
-    └─test
-    ├─ controller
-    ├─ services
-    ├─ mapper
-    ├─ dto
-    ├─ entity
-    └─ exception
+
+## 📁 Package Structure
+
+com/Aniverse/Common
+├─ controller
+├─ services
+├─ mapper
+├─ dto
+├─ entity
+└─ exception
+
+
+
 
 
