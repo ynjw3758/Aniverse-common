@@ -28,7 +28,7 @@ public class Main {
 	@GetMapping("/refresh-main")
 	public ResponseEntity<Map<String, Object>> refresh(
 			/*@RequestBody Map<String ,Object> info*/
-			@RequestParam("Id") String id) {
+			@RequestParam("id") String id) {
 		logger.info("메인 페이지 리로딩");
 		logger.info("info: " + id);
 		Map<String, Object> result_data = new HashMap<String, Object>();

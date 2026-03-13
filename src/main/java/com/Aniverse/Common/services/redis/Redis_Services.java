@@ -2,6 +2,7 @@ package com.Aniverse.Common.services.redis;
 
 import org.springframework.stereotype.Service;
 
+import com.Aniverse.Common.dto.request.login.SessionRedisDto;
 import com.Aniverse.Common.exception.CustomException;
 import com.Aniverse.Common.exception.ErrorCode;
 
@@ -115,6 +116,10 @@ public class Redis_Services {
         
         final String KEY_VALUE = (String) valueOperations.get(key);
         return;
+    }
+    
+    public void saveSession(SessionRedisDto session) {
+    	
     }
     
     public void InsertToken(String key, String value,Long expiredTime){

@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.Aniverse.Common.dto.request.login.CreateNaver;
-import com.Aniverse.Common.dto.request.login.NaverCode;
+import com.Aniverse.Common.dto.request.login.NaRequestInfo;
 import com.Aniverse.Common.exception.CustomException;
 import com.Aniverse.Common.exception.ErrorCode;
 import com.Aniverse.Common.exception.RestemplateExceptionHandler;
@@ -65,7 +65,7 @@ public class AuthNaver {
 		this.token = token;
 	}
 	@Transactional
-	public Map<String, Object> Create_Naver(CreateNaver info){
+	public Map<String, Object> Create_Naver(CreateNaver info ,HttpServletRequest requestInfo){
 		Map<String, Object> result = new HashMap<>();
 		Map<String ,Object> token_infos = new HashMap<String ,Object>();
 		Map<String ,Object> infos = new HashMap<String ,Object>();
@@ -90,7 +90,8 @@ public class AuthNaver {
 	    logger.info("정보 :" + infos);
 	    mapper.naver_insert(infos);
 	    mapper.dtlink(infos.get("email").toString());
-		token_infos = token.CreateToken(infos.get("id").toString());
+		token_infos = token.CreateToken(infos.get("id").toString(),requestInfo,
+				"NAVER" ,info.getClientType());
 		logger.info("토큰 정보 : "+ token_infos);
 		data.put("refresh_token", token_infos.get("refresh_token").toString());
 		data.put("access_token", token_infos.get("access_token").toString());
@@ -105,7 +106,7 @@ public class AuthNaver {
 	}
 	
 	
-	public Map<String, Object> Naver_Login(NaverCode infos , HttpServletRequest tokens){
+	public Map<String, Object> Naver_Login(NaRequestInfo infos , HttpServletRequest tokens){
 
 		Map<String ,Object> result = new HashMap<String, Object>();
 		String apiurl="https://nid.naver.com/";
@@ -141,7 +142,7 @@ public class AuthNaver {
 				e.printStackTrace();
 			}
 			String access_token = json.get("access_token").toString();
-			User_info = GetUser_info(access_token ,tokens);
+			User_info = GetUser_info(access_token ,tokens ,infos);
 			logger.info("결과 :" + User_info);
 			result =User_info; 
 		}
@@ -157,9 +158,12 @@ public class AuthNaver {
 		
 	}
 	
-	public Map<String ,Object> GetUser_info(String token, HttpServletRequest headers){
+	public Map<String ,Object> GetUser_info(String token,
+			HttpServletRequest requestInfo,
+			NaRequestInfo info){
 		
 		Map<String ,Object> data = new HashMap<String, Object>();
+		Map<String ,Object> token_infos = new HashMap<String ,Object>();
 		Map<String ,Object> response_data = new HashMap<String, Object>();
 		String apiurl="https://openapi.naver.com/";
 		String path = "v1/nid/me";
@@ -224,6 +228,9 @@ public class AuthNaver {
 	                response_data.put("profile_img", user_data.get("profile_img").toString());
 	                //response_data.put("exp", token_data.get("exp"));
 	                logger.info("데이터 : " + response_data);
+	    			token_infos = token_info.CreateToken(user_infos.get("id").toString(),requestInfo,
+	    					"NAVER" ,info.getClientType());
+	    			logger.info("토큰 정보 : "+ token_infos);
 	                
 	                data.put("msg", "login success");
 	                data.put("data", response_data);
@@ -240,7 +247,6 @@ public class AuthNaver {
 		    
 		    if(email_check == false) {
 		    Map<String, Object> insert_info = new HashMap<String ,Object>();
-		    Map<String ,Object> token_infos = new HashMap<String ,Object>();
             logger.info("네이버 계정으로 아이디 생성");
 		    logger.info("네이버 정보 : " + user_infos);
 		    
@@ -263,7 +269,8 @@ public class AuthNaver {
 		    
 			mapper.naver_insert(insert_info);
 			
-			token_infos = token_info.CreateToken(user_infos.get("id").toString());
+			token_infos = token_info.CreateToken(user_infos.get("id").toString(),requestInfo,
+					"NAVER" ,info.getClientType());
 			logger.info("토큰 정보 : "+ token_infos);
 			
 			response_data.put("refresh_token", token_infos.get("refresh_token").toString());

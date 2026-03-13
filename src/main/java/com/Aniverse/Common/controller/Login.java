@@ -16,9 +16,9 @@ import org.springframework.http.ResponseEntity;
 
 import com.Aniverse.Common.dto.request.login.CreateKakao;
 import com.Aniverse.Common.dto.request.login.CreateNaver;
-import com.Aniverse.Common.dto.request.login.KakaoCode;
+import com.Aniverse.Common.dto.request.login.KaRequestInfo;
 import com.Aniverse.Common.dto.request.login.LoginRequest;
-import com.Aniverse.Common.dto.request.login.NaverCode;
+import com.Aniverse.Common.dto.request.login.NaRequestInfo;
 import com.Aniverse.Common.exception.CustomException;
 import com.Aniverse.Common.exception.ErrorCode;
 import com.Aniverse.Common.services.auth.LoginService;
@@ -63,12 +63,14 @@ public class Login {
 			JSONObject res_data = new JSONObject(result_data);
 			JSONObject ACCESS_TOKEN = new JSONObject(res_data.get("data").toString());
 			response.addHeader("Authorization", ACCESS_TOKEN.get("access_token").toString());
-			
+			result_data.remove("access_token");
+			result_data.remove("exp");
+			result_data.remove("refresh_token");
 		    ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", ACCESS_TOKEN.get("refresh_token").toString())
 		            .httpOnly(true)
 		            .secure(false) // HTTPS 환경에서만 사용할 경우
 		            .path("/")
-		            .maxAge(/*30 * 24 * 60 * 60*/60 * 5) // 30일
+		            .maxAge(60 * 60 * 24 * 14)
 		            .sameSite("Lax") // 또는 "Lax"
 		            .build();
 	
@@ -77,13 +79,10 @@ public class Login {
 	}
 	
 	@GetMapping("/oauth/kakao")
-	public ResponseEntity<Map<String, Object>> Kakao_login(@ModelAttribute @Valid KakaoCode code,
-			HttpServletResponse response) {
+	public ResponseEntity<Map<String, Object>> Kakao_login(@ModelAttribute @Valid KaRequestInfo code,
+			HttpServletResponse response ,HttpServletRequest request) {
 		Map<String, Object> result_data = new HashMap<String, Object>();
-		logger.info("code : " + code);
-		result_data = kakao.kakao_login(code);
-		logger.info("결과값 : " + result_data);
-
+		result_data = kakao.kakao_login(code ,request);
 		if (result_data.get("code").equals(201)) {
 			logger.info("신규 회원 로그인 성공");
 			JSONObject res_data = new JSONObject(result_data);
@@ -93,7 +92,7 @@ public class Login {
 
 			response.addHeader("Authorization", ACCESS_TOKEN.get("access_token").toString());
 		    ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", ACCESS_TOKEN.get("refresh_token").toString())
-		            .httpOnly(false)
+		            .httpOnly(true)
 		            .secure(false) // HTTPS 환경에서만 사용할 경우
 		            .path("/")
 		            .maxAge(30 * 24 * 60 * 60) // 30일
@@ -109,16 +108,16 @@ public class Login {
 	
 	@PostMapping("/naver/create")
 	public ResponseEntity<Map<String, Object>> create_kakao(@Valid @RequestBody CreateNaver naver_info,
-			HttpServletResponse response){
+			HttpServletResponse response ,HttpServletRequest request){
 		Map<String, Object> result =new HashMap<String ,Object>();
 		logger.info("카카오 새게정 만들기");
-		result =naver.Create_Naver(naver_info);
+		result =naver.Create_Naver(naver_info ,request);
 		Map<String, Object> TOKEN = (Map<String, Object>) result.get("data");
         logger.info("토큰 결과 :" +TOKEN );
 		response.addHeader("Authorization", TOKEN.get("access_token").toString());
 		
 	    ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", TOKEN.get("refresh_token").toString())
-	            .httpOnly(false)
+	            .httpOnly(true)
 	            .secure(false) // HTTPS 환경에서만 사용할 경우
 	            .path("/")
 	            .maxAge(30 * 24 * 60 * 60) // 30일
@@ -134,10 +133,10 @@ public class Login {
 	
 	@PostMapping("/kakao/create")
 	public ResponseEntity<Map<String, Object>> create_kakao(@Valid @RequestBody CreateKakao kakao_info,
-			HttpServletResponse response){
+			HttpServletResponse response ,HttpServletRequest request){
 		Map<String, Object> result =new HashMap<String ,Object>();
 		logger.info("카카오 새게정 만들기");
-		result =kakao.create_kakao(kakao_info);
+		result =kakao.create_kakao(kakao_info , request);
 		Map<String, Object> TOKEN = (Map<String, Object>) result.get("data");
         logger.info("토큰 결과 :" +TOKEN );
 		response.addHeader("Authorization", TOKEN.get("access_token").toString());
@@ -158,7 +157,7 @@ public class Login {
 	}
 	
 	@GetMapping("/oauth/naver")
-	public ResponseEntity<Map<String, Object>> naver_login(@ModelAttribute @Valid NaverCode infos, 
+	public ResponseEntity<Map<String, Object>> naver_login(@ModelAttribute @Valid NaRequestInfo infos, 
 			HttpServletRequest requests, HttpServletResponse response) {
 		Map<String, Object> result_data = new HashMap<String, Object>();
 		result_data =naver.Naver_Login(infos, requests );

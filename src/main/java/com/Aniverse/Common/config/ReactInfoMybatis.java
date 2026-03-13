@@ -15,7 +15,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @MapperScan(basePackages = "com.Aniverse.Common.mapper.ReactCommon", sqlSessionFactoryRef = "ReactCommonSqlSessionFactory")
-public class ReactCommon_Mybatis {
+public class ReactInfoMybatis {
 	
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource.reactcommon.hikari")
@@ -35,7 +35,7 @@ public class ReactCommon_Mybatis {
 			ApplicationContext applicationContext) throws Exception {
 		SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
 		sqlSessionFactoryBean.setDataSource(DataSource);
-		sqlSessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:/mappers/ReactCommon.xml"));
+		sqlSessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:/mappers/reactcommon/*.xml"));
 		return sqlSessionFactoryBean.getObject();
 	}
 

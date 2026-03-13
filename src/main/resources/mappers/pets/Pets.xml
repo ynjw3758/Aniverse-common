@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.Aniverse.Common.mapper.Pets.Pets_Mapper">
+
+<select id="getPets" parameterType="java.util.UUID" resultType="java.util.HashMap">
+   select * from user_pets where user_id=#{userId, jdbcType=OTHER};
+</select>
+<select id="getCatagory" resultType="com.Aniverse.Common.dto.pets.PetCategoryResponse">
+  select category_id as id, code as code, name_ko as nameKo, sort_order as sortOrder  from pet_category where is_active=true;  
+</select>
+<select id="getBreed" parameterType="String" resultType="com.Aniverse.Common.dto.pets.PetBreedResponse">
+
+		select b.breed_id, b.name_ko, b.name_en
+		from pet_breed b
+		join pet_category c on b.category_id = c.category_id
+		where c.code =#{catagoryCode}
+		  and b.is_active = true
+		order by b.popularity_score desc;
+</select>
+</mapper>

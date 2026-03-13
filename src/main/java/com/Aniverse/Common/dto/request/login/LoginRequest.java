@@ -13,6 +13,7 @@ public class LoginRequest {
 
     @NotBlank(message = "비밀번호는 필수입니다.")
     private String password;
+    private String clientType;
     
     public String getId() {
     	return id;
@@ -28,5 +29,13 @@ public class LoginRequest {
 
     public void setPassword(String password) {
     	this.password = password;
+    }
+    
+    public String getClientType() {
+    	return clientType;
+    }
+    
+    public void setClientType(String clientType) {
+    	this.clientType = clientType;
     }
 }

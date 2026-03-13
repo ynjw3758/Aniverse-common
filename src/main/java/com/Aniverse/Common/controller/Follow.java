@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Aniverse.Common.dto.request.common.OneId;
-import com.Aniverse.Common.dto.request.login.NaverCode;
+import com.Aniverse.Common.dto.request.login.NaRequestInfo;
 import com.Aniverse.Common.services.follow.FollowService;
 
 import jakarta.servlet.http.HttpServletRequest;

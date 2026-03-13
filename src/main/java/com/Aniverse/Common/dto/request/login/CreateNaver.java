@@ -30,6 +30,17 @@ public class CreateNaver {
     @NotBlank(message = "성별은 필수입니다.")
     private String gender;
     
+    @NotBlank(message = "클라이언트 타입은 필수입니다.")
+    private String clientType;
+    
+    public void setClineType(String clientType) {
+        this.clientType = clientType;    	
+    }
+    
+    public String getClientType() {
+    	return clientType;
+    }
+    
     public void setUsername(String username) {
     	this.username = username;
     }

@@ -49,7 +49,8 @@ public class LoginService {
 						UserInfo.get("password").toString());
 				if(pass_check == true) {
 					Map<String, Object> TokenInfos = new HashMap<>();
-					TokenInfos = token.CreateToken(UserInfo.get("connectid").toString());
+					TokenInfos = token.CreateToken(UserInfo.get("connectid").toString() ,request,
+							 "LOCAL" ,infos.getClientType());
 					logger.info("토큰 생성 정보 :" + TokenInfos);
 					
 					Map<String, Object> data = new HashMap<>();
@@ -79,7 +80,8 @@ public class LoginService {
 		}else {
 			 logger.info("기존 로그인 정보 있음");
 				Map<String, Object> TokenInfos = new HashMap<>();
-				TokenInfos = token.CreateToken(UserInfo.get("connectid").toString());
+				TokenInfos = token.CreateToken(UserInfo.get("connectid").toString(),request,
+						"LOCAL" ,infos.getClientType());
 				logger.info("토큰 생성 정보 :" + TokenInfos);
 				
 				Map<String, Object> data = new HashMap<>();

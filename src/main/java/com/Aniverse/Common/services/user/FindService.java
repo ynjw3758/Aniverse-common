@@ -27,21 +27,24 @@ public class FindService {
 	public Map<String , Object> findid(FindId info){
 		
 	Map<String , Object> result_data = new HashMap<String , Object>();
+	Map<String , Object> result = new HashMap<String , Object>();
 	      logger.info("사용자 id찾기");
 	      result_data = userinfo.findId(info);
 	      logger.info("사용자 아이디 조회 결과 :" + result_data);
 	      if(result_data !=null ) {
 	    	  logger.info("아이디 찾기 성공");
-	    	  result_data.put("resultCode", 200);
-	    	  result_data.put("resultMsg", "아이디 찾기 완료");
-	    	  result_data.put("id", result_data.get("id").toString());
+	    	  result.put("resultCode", 200);
+	    	  result.put("resultMsg", "아이디 찾기 완료");
+	    	  result.put("id", result_data.get("id").toString());
 	    	  
 	      }
 	      else {
 	    	  logger.info("아이디 찾기 실패");
-	    	  throw new CustomException(ErrorCode.EXIST_NOT_ID, null);
+	    	  result.put("resultCode", 200);
+	    	  result.put("resultMsg", "아이디가 없다");
+	    	  result.put("id", null);
 	      }
-	return result_data;
+	return result;
 	}
 
 }

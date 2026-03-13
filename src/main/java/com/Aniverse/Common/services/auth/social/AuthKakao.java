@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.Aniverse.Common.dto.request.login.CreateKakao;
-import com.Aniverse.Common.dto.request.login.KakaoCode;
+import com.Aniverse.Common.dto.request.login.KaRequestInfo;
 import com.Aniverse.Common.exception.CustomException;
 import com.Aniverse.Common.exception.ErrorCode;
 import com.Aniverse.Common.exception.RestemplateExceptionHandler;
@@ -66,7 +66,7 @@ public class AuthKakao {
 		
 	}
 	    @Transactional
-		public Map<String, Object> create_kakao(CreateKakao kakao_info){
+		public Map<String, Object> create_kakao(CreateKakao kakao_info ,HttpServletRequest request){
 	
 			Map<String, Object> result_data = new HashMap<String, Object>();
 			Map<String ,Object> token_infos = new HashMap<String ,Object>();
@@ -92,7 +92,8 @@ public class AuthKakao {
 		    logger.info("카카오 새 계정 정보 :" + infos.get("id").toString());
 		    mapper.kakao_insert(infos);
 		    mapper.dtlink(infos.get("email").toString());
-			token_infos = token.CreateToken(infos.get("id").toString());
+			token_infos = token.CreateToken(infos.get("id").toString(),request,
+					kakao_info.getClientType() , "KAKAO");
 			logger.info("토큰 정보 : "+ token_infos);
 			data.put("refresh_token", token_infos.get("refresh_token").toString());
 			data.put("access_token", token_infos.get("access_token").toString());
@@ -120,13 +121,11 @@ public class AuthKakao {
     }
 	
 	//카카오 로그인
-	public Map<String, Object>kakao_login(KakaoCode code){
-		logger.info("카카오 로그인 :" + code+ " , " + "client_id : " + client_id) ;
+	public Map<String, Object>kakao_login(KaRequestInfo info ,HttpServletRequest requestInfo){
 		Map<String ,Object> result_data = new HashMap<String, Object>();
 		Map<String ,Object> user_infos = new HashMap<String, Object>();
 		Map<String ,Object> response_data = new HashMap<String, Object>();
 		Map<String, Object> kakao_info = new HashMap<String, Object>();
-		logger.info("시크릿 키 : " + seckret_key);
 		
 		String apiurl="https://kauth.kakao.com/";
 		String path = "oauth/token";
@@ -141,7 +140,7 @@ public class AuthKakao {
 		param.add("grant_type", "authorization_code");
 		param.add("client_id", client_id);
 		param.add("redirect_uri", redirect_url);
-		param.add("code", code.getCode());
+		param.add("code", info.getCode());
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(param, header);
 		ResponseEntity<String> respondatas = restemplate.exchange(url, HttpMethod.POST, request, String.class);
 		logger.info("respondata : " + respondatas);
@@ -191,7 +190,8 @@ public class AuthKakao {
 				result_data.put("code", 400);
 				throw new CustomException(ErrorCode.USER_NOT_INFO, result_data);
 			}
-				token_infos = token.CreateToken(user_infos.get("id").toString());
+				token_infos = token.CreateToken(user_infos.get("id").toString() ,requestInfo,
+						 "KAKAO" ,info.getClientType());
 				logger.info("토큰 정보 : "+ token_infos);
 				
 					response_data.put("exp", token_infos.get("exp"));
@@ -235,7 +235,8 @@ public class AuthKakao {
 			    insert_info.put("social_type","kakao");
 			    
 				mapper.kakao_insert(insert_info);
-				token_infos = token.CreateToken(user_infos.get("id").toString());
+				token_infos = token.CreateToken(user_infos.get("id").toString() ,requestInfo,
+						 "KAKAO" ,info.getClientType());
 				logger.info("토큰 정보 : "+ token_infos);
 				
 				response_data.put("refresh_token", token_infos.get("refresh_token").toString());
