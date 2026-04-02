@@ -59,6 +59,7 @@ public class LoginService {
 					data.put("access_token", TokenInfos.get("access_token").toString());
 					data.put("refresh_token", TokenInfos.get("refresh_token").toString());
 					data.put("exp", TokenInfos.get("exp").toString());
+					data.put("sessionId", TokenInfos.get("sessionId").toString());
 					
 					result.put("code", 200);
 					result.put("msg", "로그인 성공 ");

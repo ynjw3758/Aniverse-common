@@ -83,6 +83,7 @@ public class TokenProvider {
 	        String sessionId = UUID.randomUUID().toString();
 	        String ip = util.getClientIp(request);
 	        String userAgent = request.getHeader("User-Agent");
+	        String SessionId="";
 
 	        SessionRedisDto session = new SessionRedisDto();
 	        session.setSessionId(sessionId);
@@ -101,6 +102,7 @@ public class TokenProvider {
 	        tokeninfo.put("access_token", access_Token);
 	        tokeninfo.put("refresh_token", refresh_Token);
 	        tokeninfo.put("exp", payload_info.get("exp").toString());
+	        tokeninfo.put("sessionId", sessionId);
 	        //Redis.InsertToken(id, refresh_Token, refresh_time);
 	        return tokeninfo;
 		   

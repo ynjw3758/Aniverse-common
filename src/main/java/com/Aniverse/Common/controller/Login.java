@@ -58,15 +58,17 @@ public class Login {
 			HttpServletResponse response, HttpServletRequest quest) {
 		Map<String, Object> result_data = new HashMap<String, Object>();
 			result_data = auth.Login(login_info ,quest);
-			
+			logger.info("결과 :" + result_data);
 			HttpHeaders headers = new HttpHeaders();
 			JSONObject res_data = new JSONObject(result_data);
 			JSONObject ACCESS_TOKEN = new JSONObject(res_data.get("data").toString());
-			response.addHeader("Authorization", ACCESS_TOKEN.get("access_token").toString());
-			result_data.remove("access_token");
-			result_data.remove("exp");
-			result_data.remove("refresh_token");
-		    ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", ACCESS_TOKEN.get("refresh_token").toString())
+			Map<String, Object> data = (Map<String, Object>) result_data.get("data");
+			data.remove("access_token");
+			data.remove("exp");
+			data.remove("refresh_token");
+			data.remove("sessionId");
+			result_data.put("data", data);
+		    ResponseCookie refreshTokenCookie = ResponseCookie.from("SID", ACCESS_TOKEN.get("sessionId").toString())
 		            .httpOnly(true)
 		            .secure(false) // HTTPS 환경에서만 사용할 경우
 		            .path("/")
@@ -75,6 +77,7 @@ public class Login {
 		            .build();
 	
 		    response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+		    logger.info("결과 :" + result_data);
 			return ResponseEntity.status(HttpStatus.OK).body(result_data);
 	}
 	
@@ -90,7 +93,7 @@ public class Login {
 			JSONObject ACCESS_TOKEN = new JSONObject(res_data.get("data").toString());
 			logger.info("access : " + ACCESS_TOKEN.get("access_token").toString());
 
-			response.addHeader("Authorization", ACCESS_TOKEN.get("access_token").toString());
+			//response.addHeader("Authorization", ACCESS_TOKEN.get("access_token").toString());
 		    ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", ACCESS_TOKEN.get("refresh_token").toString())
 		            .httpOnly(true)
 		            .secure(false) // HTTPS 환경에서만 사용할 경우

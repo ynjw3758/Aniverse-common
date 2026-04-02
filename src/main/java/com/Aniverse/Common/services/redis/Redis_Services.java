@@ -2,23 +2,22 @@ package com.Aniverse.Common.services.redis;
 
 import org.springframework.stereotype.Service;
 
+
 import com.Aniverse.Common.dto.request.login.SessionRedisDto;
 import com.Aniverse.Common.exception.CustomException;
 import com.Aniverse.Common.exception.ErrorCode;
 
 import java.time.Duration;
-
-
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.boot.autoconfigure.data.redis.*;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 
 @Service
@@ -118,9 +117,71 @@ public class Redis_Services {
         return;
     }
     
-    public void saveSession(SessionRedisDto session) {
-    	
+    public String saveSession(SessionRedisDto session) {
+        if (session == null) {
+            throw new IllegalArgumentException("session 은 null일 수 없습니다.");
+        }
+        if (session.getSessionId() == null || session.getSessionId().isBlank()) {
+            throw new IllegalArgumentException("sessionId 는 필수입니다.");
+        }
+        if (session.getUserId() == null || session.getUserId().isBlank()) {
+            throw new IllegalArgumentException("userId 는 필수입니다.");
+        }
+        if (session.getRefreshExp() == null) {
+            throw new IllegalArgumentException("refreshExp 는 필수입니다.");
+        }
+
+        String sessionKey = "session:" + session.getSessionId();
+        String userSessionSetKey = "user:sessions:" + session.getUserId();
+
+        HashOperations<String, Object, Object> hashOperations = refreshTokenRedisTemplate.opsForHash();
+        SetOperations<String, Object> setOperations = refreshTokenRedisTemplate.opsForSet();
+
+        hashOperations.put(sessionKey, "sessionId", getSafeString(session.getSessionId()));
+        hashOperations.put(sessionKey, "userId", getSafeString(session.getUserId()));
+        hashOperations.put(sessionKey, "accessToken", getSafeString(session.getAccessToken()));
+        hashOperations.put(sessionKey, "refreshToken", getSafeString(session.getRefreshToken()));
+        hashOperations.put(sessionKey, "accessExp", String.valueOf(getSafeLong(session.getAccessExp())));
+        hashOperations.put(sessionKey, "refreshExp", String.valueOf(getSafeLong(session.getRefreshExp())));
+        hashOperations.put(sessionKey, "loginType", getSafeString(session.getLoginType()));
+        hashOperations.put(sessionKey, "clientType", getSafeString(session.getClientType()));
+        hashOperations.put(sessionKey, "ip", getSafeString(session.getIp()));
+        hashOperations.put(sessionKey, "userAgent", getSafeString(session.getUserAgent()));
+        hashOperations.put(sessionKey, "createdAt", String.valueOf(getSafeLong(session.getCreatedAt())));
+        hashOperations.put(sessionKey, "lastAccessAt", String.valueOf(getSafeLong(session.getLastAccessAt())));
+
+        long sessionTtlMillis = session.getRefreshExp() - System.currentTimeMillis();
+        if (sessionTtlMillis <= 0) {
+            throw new IllegalArgumentException("이미 만료된 세션은 저장할 수 없습니다.");
+        }
+
+        refreshTokenRedisTemplate.expire(sessionKey, Duration.ofMillis(sessionTtlMillis));
+
+        setOperations.add(userSessionSetKey, session.getSessionId());
+
+        Long userSessionSetTtlSeconds = refreshTokenRedisTemplate.getExpire(userSessionSetKey);
+        long sessionTtlSeconds = sessionTtlMillis / 1000;
+
+        if (userSessionSetTtlSeconds == null || userSessionSetTtlSeconds < sessionTtlSeconds) {
+            refreshTokenRedisTemplate.expire(userSessionSetKey, Duration.ofMillis(sessionTtlMillis));
+        }
+        
+        return session.getSessionId();
     }
+    
+    public void removeSessionBySessionId(String sessionId, String userId) {
+        String sessionKey = "session:" + sessionId;
+        String userSessionSetKey = "user:sessions:" + userId;
+
+        refreshTokenRedisTemplate.delete(sessionKey);
+        refreshTokenRedisTemplate.opsForSet().remove(userSessionSetKey, sessionId);
+    }
+
+    public Set<Object> findSessionIdsByUserId(String userId) {
+        String userSessionSetKey = "user:sessions:" + userId;
+        return refreshTokenRedisTemplate.opsForSet().members(userSessionSetKey);
+    }
+
     
     public void InsertToken(String key, String value,Long expiredTime){
 
@@ -129,6 +190,14 @@ public class Redis_Services {
         
         final String KEY_VALUE = (String) valueOperations.get(key);
         return;
+    }
+    
+    private String getSafeString(String value) {
+        return Objects.requireNonNullElse(value, "");
+    }
+
+    private long getSafeLong(Long value) {
+        return value == null ? 0L : value;
     }
 
 }
